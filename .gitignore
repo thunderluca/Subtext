@@ -3,6 +3,8 @@
 *.FileListAbsolute.txt
 bin/
 obj/
+packages/
+src/.vs/
 *.ncb
 *.nlb
 *.aps
