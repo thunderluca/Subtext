@@ -25,8 +25,6 @@ using System.Web.Caching;
 using System.Web.Hosting;
 using System.Web.Mvc;
 using System.Web.Routing;
-using Lucene.Net.Analysis;
-using Lucene.Net.Analysis.Snowball;
 using Lucene.Net.Store;
 using Microsoft.Web.Infrastructure.DynamicModuleHelper;
 using Ninject;
@@ -123,7 +121,8 @@ namespace Subtext.Web.App_Start
                 kernel.Bind<Lucene.Net.Store.Directory>()
                     .ToMethod(c => FSDirectory.Open(new DirectoryInfo(HostingEnvironment.MapPath(indexingSettings.IndexFolderLocation))))
                     .InSingletonScope();
-                kernel.Bind<Analyzer>().To<SnowballAnalyzer>().InSingletonScope()
+                kernel.Bind<Lucene.Net.Analysis.Analyzer>().To<Lucene.Net.Analysis.Snowball.SnowballAnalyzer>().InSingletonScope()
+                    .WithConstructorArgument("matchVersion", Lucene.Net.Util.Version.LUCENE_30)
                     .WithConstructorArgument("name", indexingSettings.Language)
                     .WithConstructorArgument("stopSet", indexingSettings.StopWords);
             }

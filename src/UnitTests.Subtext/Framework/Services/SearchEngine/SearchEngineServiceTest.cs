@@ -14,19 +14,18 @@ namespace UnitTests.Subtext.Framework.Services.SearchEngine
     public class SearchEngineServiceTest
     {
         private SearchEngineService _service;
-        private string[] stopWords;
+        private HashSet<string> stopWords;
 
         [SetUp]
         public void CreateSearchEngine()
         {
-            stopWords = new string[StopAnalyzer.ENGLISH_STOP_WORDS_SET.Values.Count + 1];
-            stopWords[0] = "into";
-            int i = 1;
-            foreach (string value in StopAnalyzer.ENGLISH_STOP_WORDS_SET.Values)
+            stopWords = new HashSet<string>(); 
+            stopWords.Add("into");
+            foreach (string value in StopAnalyzer.ENGLISH_STOP_WORDS_SET)
             {
-                stopWords[i++] = value;
+                stopWords.Add(value);
             }
-            _service = new SearchEngineService(new RAMDirectory(), new SnowballAnalyzer("English", stopWords), new FullTextSearchEngineSettings());
+            _service = new SearchEngineService(new RAMDirectory(), new SnowballAnalyzer(Lucene.Net.Util.Version.LUCENE_30, "English", stopWords), new FullTextSearchEngineSettings());
         }
 
         [TearDown]
@@ -307,7 +306,7 @@ namespace UnitTests.Subtext.Framework.Services.SearchEngine
         public void SearchEngineService_MoreLikeThisSearch_WithMinDocumentSet_ReturnsEmptySet()
         {
             _service.Dispose();
-            _service = new SearchEngineService(new RAMDirectory(), new SnowballAnalyzer("English", stopWords), new FullTextSearchEngineSettings() { Parameters = new TuningParameters() { MinimumDocumentFrequency = 20 } });
+            _service = new SearchEngineService(new RAMDirectory(), new SnowballAnalyzer(Lucene.Net.Util.Version.LUCENE_30, "English", stopWords), new FullTextSearchEngineSettings() { Parameters = new TuningParameters() { MinimumDocumentFrequency = 20 } });
 
             for (int i = 1; i <= 10; i++)
             {

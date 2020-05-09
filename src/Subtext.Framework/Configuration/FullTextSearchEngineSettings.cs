@@ -17,7 +17,9 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Configuration;
+using System.Linq;
 using System.Xml.Serialization;
 using Lucene.Net.Analysis;
 
@@ -32,7 +34,7 @@ namespace Subtext.Framework.Configuration
         public FullTextSearchEngineSettings()
         {
             Language = "English";
-            StopWords = StopAnalyzer.ENGLISH_STOP_WORDS_SET;
+            StopWords = new HashSet<string>(StopAnalyzer.ENGLISH_STOP_WORDS_SET);
             Parameters = new TuningParameters();
             MinimumScore = 0.1f;
             IndexFolderLocation = "~/App_Data";
@@ -51,12 +53,13 @@ namespace Subtext.Framework.Configuration
                 _stopWordsString = value;
                 String[] stopWords = _stopWordsString.Split(',');
 
-                var stopSet = new CharArraySet(stopWords, false);
-                StopWords = CharArraySet.UnmodifiableSet(stopSet);
+                //var stopSet = new CharArraySet(stopWords, false);
+                //StopWords = CharArraySet.UnmodifiableSet(stopSet);
+                StopWords = new HashSet<string>(stopWords);
             }
         }
         [XmlIgnore]
-        public Hashtable StopWords { get; private set; }
+        public HashSet<string> StopWords { get; private set; }
 
         public float MinimumScore { get; set; }
 

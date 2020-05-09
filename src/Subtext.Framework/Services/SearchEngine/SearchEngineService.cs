@@ -94,7 +94,7 @@ namespace Subtext.Framework.Services.SearchEngine
                 }
                 _writer = new IndexWriter(_directory, _analyzer, IndexWriter.MaxFieldLength.UNLIMITED);
                 _writer.SetMergePolicy(new LogDocMergePolicy(_writer));
-                _writer.SetMergeFactor(5);
+                _writer.MergeFactor = 5;
             }
         }
 
@@ -107,7 +107,7 @@ namespace Subtext.Framework.Services.SearchEngine
         private QueryParser BuildQueryParser()
         {
             var parser = new QueryParser(Lucene.Net.Util.Version.LUCENE_29, Body, _analyzer);
-            parser.SetDefaultOperator(QueryParser.Operator.AND);
+            parser.DefaultOperator = QueryParser.Operator.AND;
             return parser;
         }
 
@@ -160,7 +160,7 @@ namespace Subtext.Framework.Services.SearchEngine
         {
             var query = GetBlogIdSearchQuery(blogId);
             TopDocs hits = Searcher.Search(query, 1);
-            return hits.totalHits;
+            return hits.TotalHits;
         }
 
         public int GetTotalIndexedEntryCount()
@@ -199,21 +199,21 @@ namespace Subtext.Framework.Services.SearchEngine
                 Field.Store.YES,
                 Field.Index.ANALYZED,
                 Field.TermVector.YES);
-            title.SetBoost(_settings.Parameters.TitleBoost);
+            title.Boost = _settings.Parameters.TitleBoost;
 
             var body = new Field(Body,
                 post.Body,
                 Field.Store.NO,
                 Field.Index.ANALYZED,
                 Field.TermVector.YES);
-            body.SetBoost(_settings.Parameters.BodyBoost);
+            body.Boost = _settings.Parameters.BodyBoost;
 
             var tags = new Field(Tags,
                 post.Tags,
                 Field.Store.NO,
                 Field.Index.ANALYZED,
                 Field.TermVector.YES);
-            tags.SetBoost(_settings.Parameters.TagsBoost);
+            tags.Boost = _settings.Parameters.TagsBoost;
 
             var blogId = new Field(Blogid,
                 NumericUtils.IntToPrefixCoded(post.BlogId),
@@ -251,7 +251,7 @@ namespace Subtext.Framework.Services.SearchEngine
                 Field.Store.YES,
                 Field.Index.NO,
                 Field.TermVector.NO);
-            postName.SetBoost(_settings.Parameters.EntryNameBoost);
+            postName.Boost = _settings.Parameters.EntryNameBoost;
 
 
             doc.Add(postId);
@@ -292,21 +292,21 @@ namespace Subtext.Framework.Services.SearchEngine
             Query query = GetIdSearchQuery(entryId);
             TopDocs hits = Searcher.Search(query, max);
 
-            if (hits.scoreDocs.Length <= 0)
+            if (hits.ScoreDocs.Length <= 0)
             {
                 return list;
             }
 
-            int docNum = hits.scoreDocs[0].doc;
+            int docNum = hits.ScoreDocs[0].Doc;
 
             //Setup MoreLikeThis searcher
             var reader = DoWriterAction(w => w.GetReader());
-            var mlt = new MoreLikeThis(reader);
-            mlt.SetAnalyzer(_analyzer);
+            var mlt = new Lucene.Net.Search.Similar.MoreLikeThis(reader);
+            mlt.Analyzer = _analyzer;
             mlt.SetFieldNames(new[] { Title, Body, Tags });
-            mlt.SetMinDocFreq(_settings.Parameters.MinimumDocumentFrequency);
-            mlt.SetMinTermFreq(_settings.Parameters.MinimumTermFrequency);
-            mlt.SetBoost(_settings.Parameters.MoreLikeThisBoost);
+            mlt.MinDocFreq = _settings.Parameters.MinimumDocumentFrequency;
+            mlt.MinTermFreq = _settings.Parameters.MinimumTermFrequency;
+            mlt.Boost = _settings.Parameters.MoreLikeThisBoost;
 
             var moreResultsQuery = mlt.Like(docNum);
             return PerformQuery(list, moreResultsQuery, max + 1, blogId, entryId);
@@ -358,19 +358,19 @@ namespace Subtext.Framework.Services.SearchEngine
             Query isBlogQuery = GetBlogIdSearchQuery(blogId);
 
             var query = new BooleanQuery();
-            query.Add(isPublishedQuery, BooleanClause.Occur.MUST);
-            query.Add(queryOrig, BooleanClause.Occur.MUST);
-            query.Add(isBlogQuery, BooleanClause.Occur.MUST);
+            query.Add(isPublishedQuery, Occur.MUST);
+            query.Add(queryOrig, Occur.MUST);
+            query.Add(isBlogQuery, Occur.MUST);
             IndexSearcher searcher = Searcher;
             TopDocs hits = searcher.Search(query, max);
-            int length = hits.scoreDocs.Length;
+            int length = hits.ScoreDocs.Length;
             int resultsAdded = 0;
             float minScore = _settings.MinimumScore;
-            float scoreNorm = 1.0f / hits.GetMaxScore();
+            float scoreNorm = 1.0f / hits.MaxScore;
             for (int i = 0; i < length && resultsAdded < max; i++)
             {
-                float score = hits.scoreDocs[i].score * scoreNorm;
-                SearchEngineResult result = CreateSearchResult(searcher.Doc(hits.scoreDocs[i].doc), score);
+                float score = hits.ScoreDocs[i].Score * scoreNorm;
+                SearchEngineResult result = CreateSearchResult(searcher.Doc(hits.ScoreDocs[i].Doc), score);
                 if (idToFilter != result.EntryId && result.Score > minScore && result.PublishDate < DateTime.UtcNow)
                 {
                     list.Add(result);
@@ -401,7 +401,7 @@ namespace Subtext.Framework.Services.SearchEngine
                     {
                         try
                         {
-                            writer.Close();
+                            writer.Dispose();
                         }
                         catch (ObjectDisposedException e)
                         {
@@ -415,7 +415,7 @@ namespace Subtext.Framework.Services.SearchEngine
                     {
                         try
                         {
-                            directory.Close();
+                            directory.Dispose();
                         }
                         catch (ObjectDisposedException e)
                         {
