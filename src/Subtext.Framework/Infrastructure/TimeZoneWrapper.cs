@@ -58,7 +58,10 @@ namespace Subtext.Infrastructure
 
         public DateTime ToUtc(DateTime dateTime)
         {
-            return TimeZoneInfo.ConvertTime(dateTime, TimeZoneInfo, TimeZoneInfo.Utc);
+            DateTime userTime = DateTime.SpecifyKind(dateTime, DateTimeKind.Unspecified);
+            return TimeZoneInfo.ConvertTime(userTime, this.TimeZoneInfo, TimeZoneInfo.Utc);
+
+            //return TimeZoneInfo.ConvertTime(dateTime, this.TimeZoneInfo, TimeZoneInfo.Utc);
         }
 
         public DateTime FromUtc(DateTime dateTime)

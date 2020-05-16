@@ -11,7 +11,7 @@
 </div>
 <div id="authors">
     <h2>Welcome</h2>
-    <p>
+<%--    <p>
         This is the generic homepage (aka Aggregate Blog) for a Subtext community website. It aggregates 
         posts from every blog installed in this server. To modify this page, look for the Aggregate skin 
         folder in the Skins directory.
@@ -19,7 +19,7 @@
     <p>
         To learn more about the application, check out <a href="http://subtextproject.com/" title="Subtext Project Website" rel="external">
         the Subtext Project Website</a>.
-    </p>
+    </p>--%>
     <p>
         Powered By:<br />
         <a href="http://subtextproject.com/"><img src="<%# ImageUrl("poweredbysubtext85x33.png") %>" alt="Powered by Subtext" /></a>

@@ -105,7 +105,7 @@ namespace Subtext.Framework.Configuration
             bool isMobile = capabilities.Mobile;
 
             SkinConfig skin;
-            if (isMobile)
+            if (!blog.IsAggregateBlog && isMobile)
             {
                 skin = blog.MobileSkin;
                 if (skin.TemplateFolder != null)
