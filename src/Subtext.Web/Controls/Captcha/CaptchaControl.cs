@@ -211,7 +211,7 @@ namespace Subtext.Web.Controls.Captcha
             writer.Write("<img src=\"{0}", src);
             if (!IsDesignMode)
             {
-                writer.Write("?spec={0}", HttpUtility.UrlEncodeUnicode(_captcha.ToEncryptedString()));
+                writer.Write("?spec={0}", HttpUtility.UrlEncode(_captcha.ToEncryptedString()));
             }
             writer.Write("\" border=\"0\"");
 
