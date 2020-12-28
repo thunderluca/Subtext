@@ -15,10 +15,11 @@
 
 #endregion
 
-using System;
 using System.Collections.Specialized;
 using System.Globalization;
-using System.Web.Security;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Subtext.Framework.Services
 {
@@ -26,8 +27,7 @@ namespace Subtext.Framework.Services
     //      a bit more smarts about Subtext. Such as it can figure out the default image FQDN URL
     public class GravatarService
     {
-        public GravatarService(NameValueCollection settings)
-            : this(settings["GravatarUrlFormatString"], settings.GetBoolean("GravatarEnabled"))
+        public GravatarService(NameValueCollection settings) : this(settings["GravatarUrlFormatString"], settings.GetBoolean("GravatarEnabled"))
         {
         }
 
@@ -43,12 +43,25 @@ namespace Subtext.Framework.Services
 
         public string GenerateUrl(string email)
         {
-            string emailForUrl = String.Empty;
-            if (!String.IsNullOrEmpty(email))
+            var emailForUrl = string.Empty;
+
+            if (!string.IsNullOrWhiteSpace(email))
             {
-                emailForUrl = (FormsAuthentication.HashPasswordForStoringInConfigFile(email.ToLowerInvariant(), "md5") ?? string.Empty).ToLowerInvariant();
+                emailForUrl = GetMD5(email.ToLowerInvariant() ?? string.Empty).ToLowerInvariant();
             }
-            return String.Format(CultureInfo.InvariantCulture, UrlFormatString, emailForUrl);
+            
+            return string.Format(CultureInfo.InvariantCulture, UrlFormatString, emailForUrl);
+        }
+
+        private static string GetMD5(string value)
+        {
+            var algorithm = MD5.Create();
+            
+            var data = algorithm.ComputeHash(Encoding.UTF8.GetBytes(value));
+
+            var hash = string.Join(string.Empty, data.Select(b => b.ToString("x2")));
+
+            return hash;
         }
     }
 }
