@@ -26,3 +26,13 @@ obj/
 *.sig
 _ReSharper*/
 *.orig
+
+**/[Pp]ackages
+**/[Pp]ackages/*
+!**/[Pp]ackages/[Rr]epositories.[Cc]onfig
+**/.vs/
+**/App_Data/*.cfs
+**/App_Data/*.gen
+**/App_Data/*.lock
+**/App_Data/segment*
+**/Properties/PublishProfiles/*
