@@ -18,14 +18,11 @@
 using System;
 using System.Collections.Specialized;
 using System.Configuration;
-using System.IO;
 using System.Security.Principal;
 using System.Web;
 using System.Web.Caching;
-using System.Web.Hosting;
 using System.Web.Mvc;
 using System.Web.Routing;
-using Lucene.Net.Store;
 using Microsoft.Web.Infrastructure.DynamicModuleHelper;
 using Ninject;
 using Ninject.Web.Mvc;
@@ -46,13 +43,13 @@ using Subtext.ImportExport;
 using Subtext.Infrastructure;
 using Subtext.Web.Infrastructure;
 
-[assembly: WebActivator.PreApplicationStartMethod(typeof(Subtext.Web.App_Start.NinjectMVC3), "Start")]
-[assembly: WebActivator.ApplicationShutdownMethodAttribute(typeof(Subtext.Web.App_Start.NinjectMVC3), "Stop")]
+[assembly: WebActivator.PreApplicationStartMethod(typeof(Subtext.Web.App_Start.NinjectMVC3), nameof(Subtext.Web.App_Start.NinjectMVC3.Start))]
+[assembly: WebActivator.ApplicationShutdownMethod(typeof(Subtext.Web.App_Start.NinjectMVC3), nameof(Subtext.Web.App_Start.NinjectMVC3.Stop))]
 namespace Subtext.Web.App_Start
 {
     public static class NinjectMVC3
     {
-        private static readonly Ninject.Web.Mvc.Bootstrapper bootstrapper = new Ninject.Web.Mvc.Bootstrapper();
+        private static readonly Bootstrapper bootstrapper = new Bootstrapper();
 
         /// <summary>
         /// Starts the application
@@ -105,13 +102,13 @@ namespace Subtext.Web.App_Start
             kernel.Bind<ICommentFilter>().To<CommentFilter>().InRequestScope();
             kernel.Bind<IStatisticsService>().To<StatisticsService>().InRequestScope();
             kernel.Bind<ICommentSpamService>().To<AkismetSpamService>()
-                .When(r => !String.IsNullOrEmpty(r.ParentContext.Kernel.Get<Blog>().FeedbackSpamServiceKey))
+                .When(r => !string.IsNullOrEmpty(r.ParentContext.Kernel.Get<Blog>().FeedbackSpamServiceKey))
                 .InRequestScope()
                 .WithConstructorArgument("apiKey", c => c.Kernel.Get<Blog>().FeedbackSpamServiceKey)
                 .WithConstructorArgument("akismetClient", c => null);
 
             kernel.Bind<ICommentSpamService>().To<NullSpamService>()
-                .When(r => String.IsNullOrEmpty(r.ParentContext.Kernel.Get<Blog>().FeedbackSpamServiceKey))
+                .When(r => string.IsNullOrEmpty(r.ParentContext.Kernel.Get<Blog>().FeedbackSpamServiceKey))
                 .InRequestScope();
 
             var indexingSettings = FullTextSearchEngineSettings.Settings;
@@ -119,8 +116,13 @@ namespace Subtext.Web.App_Start
             if (indexingSettings.IsEnabled)
             {
                 kernel.Bind<Lucene.Net.Store.Directory>()
-                    .ToMethod(c => FSDirectory.Open(new DirectoryInfo(HostingEnvironment.MapPath(indexingSettings.IndexFolderLocation))))
+                    .ToMethod(c => new Azure.Storage.BlobDirectory(
+                        connectionString: ConfigurationManager.ConnectionStrings["luceneBlobStorage"].ConnectionString,
+                        containerName: ConfigurationManager.AppSettings["luceneBlobContainer"],
+                        leaseDuration: TimeSpan.FromMilliseconds(30000),
+                        logger: log4net.LogManager.GetLogger(nameof(Azure.Storage.BlobDirectory))))
                     .InSingletonScope();
+
                 kernel.Bind<Lucene.Net.Analysis.Analyzer>().To<Lucene.Net.Analysis.Snowball.SnowballAnalyzer>().InSingletonScope()
                     .WithConstructorArgument("matchVersion", Lucene.Net.Util.Version.LUCENE_30)
                     .WithConstructorArgument("name", indexingSettings.Language)
