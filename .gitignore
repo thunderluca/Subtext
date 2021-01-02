@@ -36,3 +36,5 @@ _ReSharper*/
 **/App_Data/*.lock
 **/App_Data/segment*
 **/Properties/PublishProfiles/*
+**/[Aa]pp.*.config
+**/[Ww]eb.*.config
