@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Specialized;
 using System.Configuration;
+using System.Globalization;
 using System.Security.Principal;
 using System.Web;
 using System.Web.Caching;
@@ -119,7 +120,7 @@ namespace Subtext.Web.App_Start
                     .ToMethod(c => new Azure.Storage.BlobDirectory(
                         connectionString: ConfigurationManager.ConnectionStrings["luceneBlobStorage"].ConnectionString,
                         containerName: ConfigurationManager.AppSettings["luceneBlobContainer"],
-                        leaseDuration: TimeSpan.FromMilliseconds(30000),
+                        leaseDuration: TimeSpan.Parse(ConfigurationManager.AppSettings["luceneBlobLeaseDuration"], CultureInfo.InvariantCulture),
                         logger: log4net.LogManager.GetLogger(nameof(Azure.Storage.BlobDirectory))))
                     .InSingletonScope();
 
