@@ -1,0 +1,76 @@
+﻿using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
+using Azure.Storage.Blobs.Specialized;
+using System;
+using System.IO;
+
+namespace Subtext.Azure.Storage
+{
+    public class BlobFile : IBlob
+    {
+        private readonly BlobClient _client;
+
+        public string Name
+        {
+            get
+            {
+                return _client.Name;
+            }
+        }
+
+        public BlobFile(BlobClient client)
+        {
+            _client = client ?? throw new ArgumentNullException(nameof(client));
+        }
+
+        public void CreateIfNotExists()
+        {
+            if (_client.Exists())
+                return;
+
+            _client.Upload(new MemoryStream());
+        }
+
+        public void DeleteIfExists()
+        {
+            _client.DeleteIfExists();
+        }
+
+        public void DownloadTo(Stream stream)
+        {
+            _client.DownloadTo(stream);
+        }
+
+        public bool Exists()
+        {
+            return _client.Exists();
+        }
+
+        public BlobLeaseClient GetBlobLeaseClient(string leaseId)
+        {
+            return _client.GetBlobLeaseClient(leaseId);
+        }
+
+        public Stream OpenRead(long position)
+        {
+            return _client.OpenRead(position);
+        }
+
+        public bool TryGetProperties(out BlobProperties properties)
+        {
+            properties = null;
+
+            var blobProperties = _client.GetProperties();
+            if (blobProperties == null || blobProperties.Value == null)
+                return false;
+
+            properties = blobProperties.Value;
+            return true;
+        }
+
+        public void Upload(Stream stream, bool overwrite)
+        {
+            _client.Upload(stream, overwrite);
+        }
+    }
+}
