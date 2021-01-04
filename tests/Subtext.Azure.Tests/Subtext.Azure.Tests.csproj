@@ -106,7 +106,9 @@
     <Reference Include="System.Web" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PrivateObject.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Storage\BlobIndexInputTests.cs" />
     <Compile Include="Storage\BlobLockTests.cs" />
     <Compile Include="TestHelper.cs" />
   </ItemGroup>

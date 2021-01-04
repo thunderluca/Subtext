@@ -11,23 +11,24 @@ namespace Subtext.Azure.Storage
 
         public BlobIndexInput(IBlob blob, int chunkSize = 4096)
         {
+            _blob = blob ?? throw new ArgumentNullException(nameof(blob));
+
             if (chunkSize <= 0)
                 throw new ArgumentOutOfRangeException(nameof(chunkSize), $"{nameof(chunkSize)} cannot be less or equal to zero");
 
-            _blob = blob ?? throw new ArgumentNullException(nameof(blob));
             _blob.CreateIfNotExists();
             _chunkSize = chunkSize;
             _position = 0;
         }
 
-        public override long Length()
-        {
-            return _blob.GetFileSizeInBytes();
-        }
-
         protected override void Dispose(bool disposing)
         {
             _blob = null;
+        }
+
+        public override long Length()
+        {
+            return _blob.GetFileSizeInBytes();
         }
 
         public override void ReadInternal(byte[] buffer, int offset, int bufferLength)
