@@ -61,7 +61,7 @@ namespace Subtext.Azure.Storage
             if (blobClient == null)
                 throw new ArgumentNullException(nameof(blobClient));
 
-            var blobFile = new BlobFile(blobClient);
+            var blobFile = new BlobFile(blobClient, _logger);
 
             blobFile.DeleteIfExists();
 
@@ -92,7 +92,7 @@ namespace Subtext.Azure.Storage
             if (blobClient == null)
                 throw new ArgumentNullException(nameof(blobClient));
 
-            var blobFile = new BlobFile(blobClient);
+            var blobFile = new BlobFile(blobClient, _logger);
 
             return blobFile.GetFileSizeInBytes();
         }
@@ -103,7 +103,7 @@ namespace Subtext.Azure.Storage
             if (blobClient == null)
                 throw new ArgumentNullException(nameof(blobClient));
 
-            var blobFile = new BlobFile(blobClient);
+            var blobFile = new BlobFile(blobClient, _logger);
 
             return blobFile.GetLastModifiedDateInMilliseconds();
         }
@@ -126,7 +126,7 @@ namespace Subtext.Azure.Storage
             if (blobClient == null)
                 throw new ArgumentNullException(nameof(blobClient));
 
-            var blobFile = new BlobFile(blobClient);
+            var blobFile = new BlobFile(blobClient, _logger);
 
             var blobLock = new BlobLock(blobFile, _leaseDuration, _logger);
 
@@ -141,7 +141,7 @@ namespace Subtext.Azure.Storage
             if (blobClient == null)
                 throw new ArgumentNullException(nameof(blobClient));
 
-            var blobFile = new BlobFile(blobClient);
+            var blobFile = new BlobFile(blobClient, _logger);
 
             return new BlobIndexInput(blobFile);
         }

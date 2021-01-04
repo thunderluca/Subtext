@@ -1,5 +1,4 @@
-﻿using Azure.Storage.Blobs.Models;
-using Azure.Storage.Blobs.Specialized;
+﻿using System;
 using System.IO;
 
 namespace Subtext.Azure.Storage
@@ -14,17 +13,17 @@ namespace Subtext.Azure.Storage
 
         bool Exists();
 
-        BlobLeaseClient GetBlobLeaseClient(string leaseId);
-
         long GetFileSizeInBytes();
 
         long GetLastModifiedDateInMilliseconds();
 
-        LeaseState GetLeaseState();
-
         string Name { get; }
 
+        string ObtainLock(TimeSpan duration, string previousLeaseId);
+
         Stream OpenRead(long position);
+
+        void ReleaseLock(string leaseId);
 
         void Upload(Stream stream, bool overwrite);
     }

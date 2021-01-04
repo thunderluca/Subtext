@@ -1,5 +1,4 @@
-﻿using Azure.Storage.Blobs.Models;
-using log4net;
+﻿using log4net;
 using Lucene.Net.Store;
 using System;
 using RequestFailedException = Azure.RequestFailedException;
@@ -12,14 +11,14 @@ namespace Subtext.Azure.Storage
         private readonly TimeSpan _duration;
         private readonly ILog _logger;
 
-        public BlobLock(IBlob blob, TimeSpan duration, ILog logger = null)
+        public BlobLock(IBlob blob, TimeSpan duration, ILog logger)
         {
             _blob = blob ?? throw new ArgumentNullException(nameof(blob));
 
-            _blob.CreateIfNotExists();
-
             if (duration <= TimeSpan.Zero)
                 throw new ArgumentOutOfRangeException(nameof(duration), $"{nameof(duration)} cannot be less or equal to {nameof(TimeSpan)}.{nameof(TimeSpan.Zero)} value");
+
+            _blob.CreateIfNotExists();
 
             _duration = duration;
 
@@ -37,33 +36,7 @@ namespace Subtext.Azure.Storage
         {
             try
             {
-                var leaseState = _blob.GetLeaseState();
-
-                switch (leaseState)
-                {
-                    case LeaseState.Leased:
-                        _logger.Error($"Requested release operation on unavailable blob ({_blob.Name}, state: {leaseState})");
-                        return false;
-                    case LeaseState.Breaking:
-                    case LeaseState.Broken:
-                        this.Release();
-                        break;
-                }
-
-                var client = _blob.GetBlobLeaseClient(this.LeaseId);
-
-                global::Azure.Response<BlobLease> leaseResponse;
-
-                if (!string.IsNullOrWhiteSpace(this.LeaseId) && leaseState == LeaseState.Expired)
-                {
-                    leaseResponse = client.Renew();
-                }
-                else
-                {
-                    leaseResponse = client.Acquire(_duration);
-                }
-
-                this.LeaseId = leaseResponse?.Value?.LeaseId;
+                this.LeaseId = _blob.ObtainLock(_duration, this.LeaseId);
 
                 return this.IsLocked();
             }
@@ -85,17 +58,7 @@ namespace Subtext.Azure.Storage
         {
             try
             {
-                var leaseState = _blob.GetLeaseState();
-
-                if (leaseState == LeaseState.Available)
-                {
-                    _logger.Warn($"Requested release operation on available blob ({_blob.Name}), skipping it");
-                    return;
-                }
-
-                var client = _blob.GetBlobLeaseClient(this.LeaseId);
-
-                client.Release();
+                _blob.ReleaseLock(this.LeaseId);
             }
             catch (RequestFailedException ex)
             {

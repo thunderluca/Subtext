@@ -1,6 +1,7 @@
 ﻿using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Azure.Storage.Blobs.Specialized;
+using log4net;
 using System;
 using System.IO;
 
@@ -9,6 +10,7 @@ namespace Subtext.Azure.Storage
     public class BlobFile : IBlob
     {
         private readonly BlobClient _client;
+        private readonly ILog _logger;
 
         public string Name
         {
@@ -18,9 +20,11 @@ namespace Subtext.Azure.Storage
             }
         }
 
-        public BlobFile(BlobClient client)
+        public BlobFile(BlobClient client, ILog logger)
         {
             _client = client ?? throw new ArgumentNullException(nameof(client));
+
+            _logger = logger;
         }
 
         public void CreateIfNotExists()
@@ -46,13 +50,11 @@ namespace Subtext.Azure.Storage
             return _client.Exists();
         }
 
-        public BlobLeaseClient GetBlobLeaseClient(string leaseId)
-        {
-            return _client.GetBlobLeaseClient(leaseId);
-        }
-
         public long GetFileSizeInBytes()
         {
+            if (!_client.Exists())
+                return 0;
+
             if (!this.TryGetProperties(out BlobProperties properties))
                 throw new ArgumentException($"Cannot retrieve properties from blob with name '{_client.Name}'", nameof(properties));
 
@@ -70,12 +72,34 @@ namespace Subtext.Azure.Storage
             return properties.LastModified.ToUnixTimeMilliseconds();
         }
 
-        public LeaseState GetLeaseState()
+        public string ObtainLock(TimeSpan duration, string previousLeaseId)
         {
-            if (!this.TryGetProperties(out BlobProperties properties))
-                throw new ArgumentException($"Cannot retrieve properties from blob with name '{_client.Name}'", nameof(properties));
+            var leaseState = this.GetLeaseState();
 
-            return properties.LeaseState;
+            switch (leaseState)
+            {
+                case LeaseState.Leased:
+                    throw new InvalidOperationException($"Requested release operation on unavailable blob ({_client.Name}, state: {leaseState})");
+                case LeaseState.Breaking:
+                case LeaseState.Broken:
+                    this.ReleaseLock(previousLeaseId);
+                    break;
+            }
+
+            var client = _client.GetBlobLeaseClient(previousLeaseId);
+
+            global::Azure.Response<BlobLease> leaseResponse;
+
+            if (!string.IsNullOrWhiteSpace(previousLeaseId) && leaseState == LeaseState.Expired)
+            {
+                leaseResponse = client.Renew();
+            }
+            else
+            {
+                leaseResponse = client.Acquire(duration);
+            }
+
+            return leaseResponse?.Value?.LeaseId;
         }
 
         public Stream OpenRead(long position)
@@ -83,9 +107,35 @@ namespace Subtext.Azure.Storage
             return _client.OpenRead(position);
         }
 
+        public void ReleaseLock(string leaseId)
+        {
+            var leaseState = this.GetLeaseState();
+
+            if (leaseState == LeaseState.Available)
+            {
+                _logger?.Warn($"Requested release operation on available blob ({_client.Name}), skipping it");
+                return;
+            }
+
+            var client = _client.GetBlobLeaseClient(leaseId);
+
+            client.Release();
+        }
+
         public void Upload(Stream stream, bool overwrite)
         {
             _client.Upload(stream, overwrite);
+        }
+
+        private LeaseState GetLeaseState()
+        {
+            if (!_client.Exists())
+                throw new InvalidOperationException($"Blob with name '{_client.Name}' doesn't exist, cannot retrieve lease state");
+
+            if (!this.TryGetProperties(out BlobProperties properties))
+                throw new ArgumentException($"Cannot retrieve properties from blob with name '{_client.Name}'", nameof(properties));
+
+            return properties.LeaseState;
         }
 
         private bool TryGetProperties(out BlobProperties properties)
