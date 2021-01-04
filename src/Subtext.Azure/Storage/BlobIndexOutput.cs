@@ -1,5 +1,4 @@
-﻿using Azure.Storage.Blobs.Models;
-using Lucene.Net.Store;
+﻿using Lucene.Net.Store;
 using System;
 using System.IO;
 
@@ -22,11 +21,7 @@ namespace Subtext.Azure.Storage
         {
             get
             {
-                var result = _blob.TryGetProperties(out BlobProperties properties);
-                if (!result)
-                    throw new ArgumentException($"Cannot retrieve properties from blob with name '{_blob.Name}'", nameof(properties));
-
-                return properties.ContentLength;
+                return _blob.GetFileSizeInBytes();
             }
         }
 

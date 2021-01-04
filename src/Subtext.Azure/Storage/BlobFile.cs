@@ -51,12 +51,44 @@ namespace Subtext.Azure.Storage
             return _client.GetBlobLeaseClient(leaseId);
         }
 
+        public long GetFileSizeInBytes()
+        {
+            if (!this.TryGetProperties(out BlobProperties properties))
+                throw new ArgumentException($"Cannot retrieve properties from blob with name '{_client.Name}'", nameof(properties));
+
+            return properties.ContentLength;
+        }
+
+        public long GetLastModifiedDateInMilliseconds()
+        {
+            if (!_client.Exists())
+                return DateTimeOffset.MinValue.ToUnixTimeMilliseconds();
+
+            if (!TryGetProperties(out BlobProperties properties))
+                throw new ArgumentException($"Cannot retrieve properties from blob with name '{_client.Name}'", nameof(properties));
+
+            return properties.LastModified.ToUnixTimeMilliseconds();
+        }
+
+        public LeaseState GetLeaseState()
+        {
+            if (!this.TryGetProperties(out BlobProperties properties))
+                throw new ArgumentException($"Cannot retrieve properties from blob with name '{_client.Name}'", nameof(properties));
+
+            return properties.LeaseState;
+        }
+
         public Stream OpenRead(long position)
         {
             return _client.OpenRead(position);
         }
 
-        public bool TryGetProperties(out BlobProperties properties)
+        public void Upload(Stream stream, bool overwrite)
+        {
+            _client.Upload(stream, overwrite);
+        }
+
+        private bool TryGetProperties(out BlobProperties properties)
         {
             properties = null;
 
@@ -66,11 +98,6 @@ namespace Subtext.Azure.Storage
 
             properties = blobProperties.Value;
             return true;
-        }
-
-        public void Upload(Stream stream, bool overwrite)
-        {
-            _client.Upload(stream, overwrite);
         }
     }
 }

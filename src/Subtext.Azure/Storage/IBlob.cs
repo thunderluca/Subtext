@@ -16,11 +16,15 @@ namespace Subtext.Azure.Storage
 
         BlobLeaseClient GetBlobLeaseClient(string leaseId);
 
+        long GetFileSizeInBytes();
+
+        long GetLastModifiedDateInMilliseconds();
+
+        LeaseState GetLeaseState();
+
         string Name { get; }
 
         Stream OpenRead(long position);
-
-        bool TryGetProperties(out BlobProperties properties);
 
         void Upload(Stream stream, bool overwrite);
     }

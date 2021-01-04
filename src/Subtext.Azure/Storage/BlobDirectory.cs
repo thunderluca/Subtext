@@ -94,11 +94,7 @@ namespace Subtext.Azure.Storage
 
             var blobFile = new BlobFile(blobClient);
 
-            var indexInput = new BlobIndexInput(blobFile);
-            if (indexInput == null)
-                throw new ArgumentNullException(nameof(indexInput));
-
-            return indexInput.Length();
+            return blobFile.GetFileSizeInBytes();
         }
 
         public override long FileModified(string name)
@@ -109,11 +105,7 @@ namespace Subtext.Azure.Storage
 
             var blobFile = new BlobFile(blobClient);
 
-            var indexInput = new BlobIndexInput(blobFile);
-            if (indexInput == null)
-                throw new ArgumentNullException(nameof(indexInput));
-
-            return indexInput.GetLastModifiedDateInMilliseconds();
+            return blobFile.GetLastModifiedDateInMilliseconds();
         }
 
         public override string[] ListAll()

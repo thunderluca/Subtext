@@ -37,14 +37,12 @@ namespace Subtext.Azure.Storage
         {
             try
             {
-                var result = _blob.TryGetProperties(out BlobProperties properties);
-                if (!result)
-                    throw new ArgumentException($"Cannot retrieve properties from blob with name '{_blob.Name}'", nameof(properties));
+                var leaseState = _blob.GetLeaseState();
 
-                switch (properties.LeaseState)
+                switch (leaseState)
                 {
                     case LeaseState.Leased:
-                        _logger.Error($"Requested release operation on unavailable blob ({_blob.Name}, state: {properties.LeaseState})");
+                        _logger.Error($"Requested release operation on unavailable blob ({_blob.Name}, state: {leaseState})");
                         return false;
                     case LeaseState.Breaking:
                     case LeaseState.Broken:
@@ -56,7 +54,7 @@ namespace Subtext.Azure.Storage
 
                 global::Azure.Response<BlobLease> leaseResponse;
 
-                if (!string.IsNullOrWhiteSpace(this.LeaseId) && properties.LeaseState == LeaseState.Expired)
+                if (!string.IsNullOrWhiteSpace(this.LeaseId) && leaseState == LeaseState.Expired)
                 {
                     leaseResponse = client.Renew();
                 }
@@ -87,11 +85,9 @@ namespace Subtext.Azure.Storage
         {
             try
             {
-                var result = _blob.TryGetProperties(out BlobProperties properties);
-                if (!result)
-                    throw new ArgumentException($"Cannot retrieve properties from blob with name '{_blob.Name}'", nameof(properties));
+                var leaseState = _blob.GetLeaseState();
 
-                if (properties.LeaseState == LeaseState.Available)
+                if (leaseState == LeaseState.Available)
                 {
                     _logger.Warn($"Requested release operation on available blob ({_blob.Name}), skipping it");
                     return;

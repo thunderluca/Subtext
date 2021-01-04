@@ -1,5 +1,4 @@
-﻿using Azure.Storage.Blobs.Models;
-using Lucene.Net.Store;
+﻿using Lucene.Net.Store;
 using System;
 
 namespace Subtext.Azure.Storage
@@ -23,11 +22,7 @@ namespace Subtext.Azure.Storage
 
         public override long Length()
         {
-            var result = _blob.TryGetProperties(out BlobProperties properties);
-            if (!result)
-                throw new ArgumentException($"Cannot retrieve properties from blob with name '{_blob.Name}'", nameof(properties));
-
-            return properties.ContentLength;
+            return _blob.GetFileSizeInBytes();
         }
 
         protected override void Dispose(bool disposing)
@@ -75,18 +70,6 @@ namespace Subtext.Azure.Storage
         public override void SeekInternal(long pos)
         {
             _position = pos;
-        }
-
-        public long GetLastModifiedDateInMilliseconds()
-        {
-            if (!_blob.Exists())
-                return DateTimeOffset.MinValue.ToUnixTimeMilliseconds();
-
-            var result = _blob.TryGetProperties(out BlobProperties properties);
-            if (!result)
-                throw new ArgumentException($"Cannot retrieve properties from blob with name '{_blob.Name}'", nameof(properties));
-
-            return properties.LastModified.ToUnixTimeMilliseconds();
         }
     }
 }
