@@ -33,7 +33,6 @@ namespace Subtext.Azure.Storage
 
         public override void ReadInternal(byte[] buffer, int offset, int bufferLength)
         {
-            System.IO.Stream stream;
             int length = 0, byteCount, readerPosition;
 
             var position = this.FilePointer;
@@ -45,14 +44,17 @@ namespace Subtext.Azure.Storage
 
             try
             {
+                var stream = new System.IO.MemoryStream();
+
+                _blob.DownloadTo(stream);
+
                 do
                 {
                     byteCount = _chunkSize + length > bufferLength ? bufferLength - length : _chunkSize;
 
-                    using (stream = _blob.OpenRead(position))
-                    {
-                        readerPosition = stream.Read(buffer, length + offset, byteCount);
-                    }
+                    stream.Seek(position, System.IO.SeekOrigin.Begin);
+
+                    readerPosition = stream.Read(buffer, length + offset, byteCount);
 
                     if (readerPosition <= -1)
                         throw new ArgumentOutOfRangeException(nameof(readerPosition), "Reader position went after end of stream");
