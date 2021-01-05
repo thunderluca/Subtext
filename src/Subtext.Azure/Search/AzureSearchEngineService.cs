@@ -52,7 +52,7 @@ namespace Subtext.Azure.Search
                         GroupId = post.GroupId,
                         IsPublished = post.IsPublished,
                         Id = post.EntryId.ToString(),
-                        Name = post.EntryName,
+                        Name = post.EntryName ?? string.Empty,
                         PublishDate = post.PublishDate,
                         Tags = post.Tags,
                         Title = post.Title

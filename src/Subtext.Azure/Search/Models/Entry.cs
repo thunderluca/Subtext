@@ -1,4 +1,5 @@
 ﻿using Azure.Search.Documents.Indexes;
+using Azure.Search.Documents.Indexes.Models;
 using System;
 
 namespace Subtext.Azure.Search.Models
@@ -8,13 +9,13 @@ namespace Subtext.Azure.Search.Models
         [SearchableField(IsFilterable = true)]
         public int BlogId { get; set; }
 
-        [SearchableField(IsFilterable = true)]
+        [SimpleField]
         public string BlogName { get; set; }
 
-        [SearchableField(IsFilterable = true)]
+        [SearchableField(IsFilterable = true, AnalyzerName = LexicalAnalyzerName.Values.StandardLucene)]
         public string Body { get; set; }
 
-        [SearchableField(IsFilterable = true)]
+        [SimpleField]
         public int GroupId { get; set; }
 
         [SearchableField(IsFilterable = true, IsKey = true)]
@@ -23,16 +24,16 @@ namespace Subtext.Azure.Search.Models
         [SearchableField(IsFilterable = true)]
         public bool IsPublished { get; set; }
 
-        [SearchableField(IsFilterable = true)]
+        [SimpleField]
         public string Name { get; set; }
 
         [SearchableField(IsFilterable = true, IsSortable = true)]
         public DateTime PublishDate { get; set; }
 
-        [SearchableField(IsFilterable = true)]
+        [SearchableField(IsFilterable = true, AnalyzerName = LexicalAnalyzerName.Values.StandardLucene)]
         public string Tags { get; set; }
 
-        [SearchableField(IsFilterable = true)]
+        [SearchableField(IsFilterable = true, AnalyzerName = LexicalAnalyzerName.Values.StandardLucene)]
         public string Title { get; set; }
     }
 }
