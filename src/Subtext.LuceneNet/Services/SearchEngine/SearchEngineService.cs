@@ -24,11 +24,11 @@ using Lucene.Net.QueryParsers;
 using Lucene.Net.Search;
 using Lucene.Net.Store;
 using Lucene.Net.Util;
-using Similarity.Net;
-using Subtext.Framework.Configuration;
 using Subtext.Framework.Logging;
+using Subtext.Framework.Services.SearchEngine;
+using Subtext.LuceneNet.Configuration;
 
-namespace Subtext.Framework.Services.SearchEngine
+namespace Subtext.LuceneNet.Services.SearchEngine
 {
 
     public class SearchEngineService : ISearchEngineService

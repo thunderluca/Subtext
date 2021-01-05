@@ -23,7 +23,7 @@ using System.Linq;
 using System.Xml.Serialization;
 using Lucene.Net.Analysis;
 
-namespace Subtext.Framework.Configuration
+namespace Subtext.LuceneNet.Configuration
 {
     public class FullTextSearchEngineSettings
     {

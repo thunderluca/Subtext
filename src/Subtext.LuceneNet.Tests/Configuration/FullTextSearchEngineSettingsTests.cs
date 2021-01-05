@@ -1,32 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Lucene.Net.Analysis;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Subtext.LuceneNet.Configuration;
 using System.Linq;
-using System.Text;
-using Lucene.Net.Analysis;
-using MbUnit.Framework;
-using Subtext.Framework.Configuration;
 
-namespace UnitTests.Subtext.Framework.Configuration
+namespace Subtext.LuceneNet.Tests.Configuration
 {
-    [TestFixture]
+    [TestClass]
     public class FullTextSearchEngineSettingsTests
     {
-
-        [Test]
+        [TestMethod]
         public void FullTextSearchEngineSettings_WithEmptyConfig_LanguageIsEnglish()
         {
             FullTextSearchEngineSettings settings = FullTextSearchEngineSettings.Settings;
             Assert.AreEqual("English", settings.Language);
         }
 
-        [Test]
+        [TestMethod]
         public void FullTextSearchEngineSettings_WithEmptyConfig_StopWordsIsDefaultOne()
         {
             FullTextSearchEngineSettings settings = FullTextSearchEngineSettings.Settings;
-            Assert.AreEqual(StopAnalyzer.ENGLISH_STOP_WORDS_SET, settings.StopWords);
+
+            Assert.AreEqual(StopAnalyzer.ENGLISH_STOP_WORDS_SET.Count, settings.StopWords.Count);
+
+            for (var i = 0; i < StopAnalyzer.ENGLISH_STOP_WORDS_SET.Count; i++)
+            {
+                Assert.AreEqual(StopAnalyzer.ENGLISH_STOP_WORDS_SET.ElementAt(i), settings.StopWords.ElementAt(i));
+            }
         }
 
-        [Test]
+        [TestMethod]
         public void FullTextSearchEngineSettings_WithStopWordsSpecified_StopWordsAreTheCorrectOnes()
         {
             FullTextSearchEngineSettings settings = FullTextSearchEngineSettings.Settings;
@@ -38,7 +40,7 @@ namespace UnitTests.Subtext.Framework.Configuration
             Assert.IsFalse(settings.StopWords.Contains("ch"));
         }
 
-        [Test]
+        [TestMethod]
         public void FullTextSearchEngineSettings_WithEmptyConfig_TuningParametersAreDefault()
         {
             FullTextSearchEngineSettings settings = FullTextSearchEngineSettings.Settings;
@@ -46,7 +48,7 @@ namespace UnitTests.Subtext.Framework.Configuration
             Assert.AreEqual(1f, settings.Parameters.EntryNameBoost);
         }
 
-        [Test]
+        [TestMethod]
         public void FullTextSearchEngineSettings_WithConfig_MinimumDocumentFrequencyIsAsSet()
         {
             FullTextSearchEngineSettings settings = FullTextSearchEngineSettings.Settings;
@@ -54,14 +56,14 @@ namespace UnitTests.Subtext.Framework.Configuration
             Assert.AreEqual(10, settings.Parameters.MinimumDocumentFrequency);
         }
 
-        [Test]
+        [TestMethod]
         public void FullTextSearchEngineSettings_WithEmptyConfig_IndexFolderLocationIsAdd_Data()
         {
             FullTextSearchEngineSettings settings = FullTextSearchEngineSettings.Settings;
             Assert.AreEqual("~/App_Data", settings.IndexFolderLocation);
         }
 
-        [Test]
+        [TestMethod]
         public void FullTextSearchEngineSettings_WithEmptyConfig_IsEnabledIsTrue()
         {
             FullTextSearchEngineSettings settings = FullTextSearchEngineSettings.Settings;
