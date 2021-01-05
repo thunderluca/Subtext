@@ -84,6 +84,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Search\Models\Preview\Entry.cs" />
+    <Compile Include="Search\Models\Preview\SearchRequest.cs" />
+    <Compile Include="Search\Models\Preview\SearchResponse.cs" />
+    <Compile Include="Search\Services\IHttpService.cs" />
+    <Compile Include="Search\Services\ISerializationService.cs" />
+    <Compile Include="Search\Services\Preview\AzurePreviewSearchClient.cs" />
     <Compile Include="Search\Services\AzureSearchClient.cs" />
     <Compile Include="Search\Services\AzureSearchIndexFactory.cs" />
     <Compile Include="Search\Services\AzureSearchEngineService.cs" />

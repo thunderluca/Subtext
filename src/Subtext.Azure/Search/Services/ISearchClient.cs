@@ -13,6 +13,8 @@ namespace Subtext.Azure.Search.Services
 
         IEnumerable<SearchEngineResult> Search(string query, int blogId, int size, int entryId = -1);
 
+        IEnumerable<SearchEngineResult> SearchRelatedContents(int blogId, int size, int entryId);
+
         IEnumerable<IndexingError> UploadEntry(SearchEngineEntry searchEngineEntry);
     }
 }

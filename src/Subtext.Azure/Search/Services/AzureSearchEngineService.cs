@@ -118,7 +118,11 @@ namespace Subtext.Azure.Search.Services
 
         public IEnumerable<SearchEngineResult> RelatedContents(int entryId, int max, int blogId)
         {
-            throw new NotImplementedException();
+            var client = _indexFactory.GetPreviewSearchClient(blogId);
+
+            var results = client.SearchRelatedContents(blogId, max, entryId);
+
+            return results;
         }
 
         public void RemovePost(int postId)

@@ -10,10 +10,13 @@ namespace Subtext.Azure.Search.Services
 {
     public class AzureSearchIndexFactory : IIndexFactory
     {
-        private readonly SearchIndexClient _indexClient;
         private readonly IDictionary<string, ISearchClient> _cacheClients;
+        private readonly string _endpoint;
+        private readonly IHttpService _httpService;
+        private readonly SearchIndexClient _indexClient;
+        private readonly ISerializationService _serializationService;
 
-        public AzureSearchIndexFactory(string apiKey, string endpoint)
+        public AzureSearchIndexFactory(string apiKey, string endpoint, IHttpService httpService, ISerializationService serializationService)
         {
             if (string.IsNullOrWhiteSpace(apiKey))
             {
@@ -25,8 +28,11 @@ namespace Subtext.Azure.Search.Services
                 throw new ArgumentException($"{nameof(endpoint)} cannot be null, empty or blank", nameof(endpoint));
             }
 
-            _indexClient = new SearchIndexClient(new Uri(endpoint), new AzureKeyCredential(apiKey));
             _cacheClients = new Dictionary<string, ISearchClient>();
+            _endpoint = endpoint;
+            _httpService = httpService ?? throw new ArgumentNullException(nameof(httpService));
+            _indexClient = new SearchIndexClient(new Uri(endpoint), new AzureKeyCredential(apiKey));
+            _serializationService = serializationService ?? throw new ArgumentNullException(nameof(serializationService));
         }
 
         public void EnsureIndexExists(int blogId)
@@ -45,6 +51,13 @@ namespace Subtext.Azure.Search.Services
             }
 
             return indexes.Select(i => i.Name).ToArray();
+        }
+
+        public ISearchClient GetPreviewSearchClient(int blogId)
+        {
+            var client = new Preview.AzurePreviewSearchClient(_endpoint, blogId, _httpService, _serializationService);
+
+            return client;
         }
 
         public ISearchClient GetSearchClient(int blogId)

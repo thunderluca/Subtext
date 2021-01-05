@@ -67,10 +67,15 @@ namespace Subtext.Azure.Search.Services
                     EntryId = int.Parse(sr.Document.Id),
                     EntryName = sr.Document.Name,
                     PublishDate = sr.Document.PublishDate,
-                    Score = sr.Score.HasValue ? Convert.ToSingle(sr.Score.Value) : 0f,
+                    Score = sr.Score.HasValue ? Convert.ToSingle(sr.Score.Value) : 1f,
                     Title = sr.Document.Title
                 })
                 .ToArray();
+        }
+
+        public IEnumerable<SearchEngineResult> SearchRelatedContents(int blogId, int size, int entryId)
+        {
+            throw new NotImplementedException();
         }
 
         public IEnumerable<IndexingError> UploadEntry(SearchEngineEntry searchEngineEntry)

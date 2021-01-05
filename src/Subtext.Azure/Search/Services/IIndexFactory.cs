@@ -8,6 +8,8 @@ namespace Subtext.Azure.Search.Services
 
         IEnumerable<string> GetIndexNames();
 
+        ISearchClient GetPreviewSearchClient(int blogId);
+
         ISearchClient GetSearchClient(int blogId);
 
         ISearchClient GetSearchClient(string indexName);
