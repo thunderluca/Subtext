@@ -15,10 +15,8 @@
 
 #endregion
 
-using System;
 using System.Collections.Specialized;
 using System.Configuration;
-using System.Globalization;
 using System.Security.Principal;
 using System.Web;
 using System.Web.Caching;
@@ -112,24 +110,6 @@ namespace Subtext.Web.App_Start
                 .When(r => string.IsNullOrEmpty(r.ParentContext.Kernel.Get<Blog>().FeedbackSpamServiceKey))
                 .InRequestScope();
 
-            var indexingSettings = FullTextSearchEngineSettings.Settings;
-
-            if (indexingSettings.IsEnabled)
-            {
-                kernel.Bind<Lucene.Net.Store.Directory>()
-                    .ToMethod(c => new Azure.Storage.BlobDirectory(
-                        connectionString: ConfigurationManager.ConnectionStrings["luceneBlobStorage"].ConnectionString,
-                        containerName: ConfigurationManager.AppSettings["luceneBlobContainer"],
-                        leaseDuration: TimeSpan.Parse(ConfigurationManager.AppSettings["luceneBlobLeaseDuration"], CultureInfo.InvariantCulture),
-                        logger: log4net.LogManager.GetLogger(nameof(Azure.Storage.BlobDirectory))))
-                    .InSingletonScope();
-
-                kernel.Bind<Lucene.Net.Analysis.Analyzer>().To<Lucene.Net.Analysis.Snowball.SnowballAnalyzer>().InSingletonScope()
-                    .WithConstructorArgument("matchVersion", Lucene.Net.Util.Version.LUCENE_30)
-                    .WithConstructorArgument("name", indexingSettings.Language)
-                    .WithConstructorArgument("stopSet", indexingSettings.StopWords);
-            }
-
             BindCoreDependencies(kernel);
             BindGenericDependencies(kernel);
             BindHttpModules(kernel);
@@ -144,7 +124,6 @@ namespace Subtext.Web.App_Start
             kernel.Bind<IAccountService>().To<AccountService>().InRequestScope();
             kernel.Bind<IEntryPublisher>().To<EntryPublisher>().InRequestScope();
             kernel.Bind<FriendlyUrlSettings>().ToMethod(context => FriendlyUrlSettings.Settings).InRequestScope();
-            kernel.Bind<FullTextSearchEngineSettings>().ToMethod(context => FullTextSearchEngineSettings.Settings).InRequestScope();
             kernel.Bind<ISubtextPageBuilder>().To<SubtextPageBuilder>().InSingletonScope();
             kernel.Bind<ISlugGenerator>().To<SlugGenerator>().InRequestScope();
             kernel.Bind<IPrincipal>().ToMethod(context => context.Kernel.Get<RequestContext>().HttpContext.User).InRequestScope();
@@ -160,11 +139,14 @@ namespace Subtext.Web.App_Start
             kernel.Bind<ISubtextContext>().To<SubtextContext>().InRequestScope();
             kernel.Bind<LazyNotNull<HostInfo>>().ToMethod(context => new LazyNotNull<HostInfo>(() => HostInfo.Instance)).InSingletonScope();
 
-            var indexingSettings = FullTextSearchEngineSettings.Settings;
-            if (indexingSettings.IsEnabled)
+            var indexingServiceEnabled = bool.Parse(ConfigurationManager.AppSettings["indexingServiceEnabled"]);
+            if (indexingServiceEnabled)
             {
                 kernel.Bind<IIndexingService>().To<IndexingService>().InSingletonScope();
-                kernel.Bind<ISearchEngineService>().To<SearchEngineService>().InSingletonScope();
+                kernel.Bind<ISearchEngineService>().ToMethod(c => new Azure.Search.AzureSearchEngineService(
+                    ConfigurationManager.AppSettings["searchApiKey"],
+                    ConfigurationManager.AppSettings["searchEndpoint"],
+                    logger: log4net.LogManager.GetLogger(nameof(Azure.Search.AzureSearchEngineService)))).InSingletonScope();
             }
             else
             {
