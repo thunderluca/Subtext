@@ -4,6 +4,7 @@ using Azure.Search.Documents.Indexes.Models;
 using Subtext.Azure.Search.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Subtext.Azure.Search.Services
 {
@@ -37,7 +38,13 @@ namespace Subtext.Azure.Search.Services
 
         public IEnumerable<string> GetIndexNames()
         {
-            return _indexClient.GetIndexNames();
+            var indexes = _indexClient.GetIndexes();
+            if (indexes == null || !indexes.Any())
+            {
+                return new string[0];
+            }
+
+            return indexes.Select(i => i.Name).ToArray();
         }
 
         public ISearchClient GetSearchClient(int blogId)
