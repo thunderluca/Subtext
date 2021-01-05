@@ -42,6 +42,7 @@ using Subtext.Framework.Web.HttpModules;
 using Subtext.ImportExport;
 using Subtext.Infrastructure;
 using Subtext.Web.Infrastructure;
+using Subtext.Web.Services;
 
 [assembly: WebActivator.PreApplicationStartMethod(typeof(Subtext.Web.App_Start.NinjectMVC3), nameof(Subtext.Web.App_Start.NinjectMVC3.Start))]
 [assembly: WebActivator.ApplicationShutdownMethod(typeof(Subtext.Web.App_Start.NinjectMVC3), nameof(Subtext.Web.App_Start.NinjectMVC3.Stop))]
@@ -143,8 +144,14 @@ namespace Subtext.Web.App_Start
             var indexingServiceEnabled = bool.Parse(ConfigurationManager.AppSettings["indexingServiceEnabled"]);
             if (indexingServiceEnabled)
             {
+                kernel.Bind<ISerializationService>().To<SystemSerializationService>().InSingletonScope();
+                kernel.Bind<IHttpService>().ToMethod(c => new SystemHttpService(ConfigurationManager.AppSettings["searchApiKey"])).InSingletonScope();
                 kernel.Bind<IIndexingService>().To<IndexingService>().InSingletonScope();
-                kernel.Bind<IIndexFactory>().ToMethod(c => new AzureSearchIndexFactory(ConfigurationManager.AppSettings["searchApiKey"], ConfigurationManager.AppSettings["searchEndpoint"])).InSingletonScope();
+                kernel.Bind<IIndexFactory>().ToMethod(c => new AzureSearchIndexFactory(
+                    ConfigurationManager.AppSettings["searchApiKey"], 
+                    ConfigurationManager.AppSettings["searchEndpoint"],
+                    c.Kernel.Get<IHttpService>(),
+                    c.Kernel.Get<ISerializationService>())).InSingletonScope();
                 kernel.Bind<ISearchEngineService>().To<AzureSearchEngineService>().InSingletonScope().WithConstructorArgument("logger", log4net.LogManager.GetLogger(nameof(AzureSearchEngineService)));
             }
             else
