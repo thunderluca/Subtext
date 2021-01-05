@@ -143,10 +143,8 @@ namespace Subtext.Web.App_Start
             if (indexingServiceEnabled)
             {
                 kernel.Bind<IIndexingService>().To<IndexingService>().InSingletonScope();
-                kernel.Bind<ISearchEngineService>().ToMethod(c => new Azure.Search.AzureSearchEngineService(
-                    ConfigurationManager.AppSettings["searchApiKey"],
-                    ConfigurationManager.AppSettings["searchEndpoint"],
-                    logger: log4net.LogManager.GetLogger(nameof(Azure.Search.AzureSearchEngineService)))).InSingletonScope();
+                kernel.Bind<Azure.Search.Services.IIndexFactory>().ToMethod(c => new Azure.Search.Services.AzureSearchIndexFactory(ConfigurationManager.AppSettings["searchApiKey"], ConfigurationManager.AppSettings["searchEndpoint"])).InSingletonScope();
+                kernel.Bind<ISearchEngineService>().To<Azure.Search.Services.AzureSearchEngineService>().InSingletonScope();
             }
             else
             {
