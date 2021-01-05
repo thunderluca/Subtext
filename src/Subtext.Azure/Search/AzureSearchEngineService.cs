@@ -258,9 +258,12 @@ namespace Subtext.Azure.Search
             var searchFields = new[]
             {
                 new SearchField(nameof(Entry.BlogId), SearchFieldDataType.Int32) { IsFilterable = true },
+                new SimpleField(nameof(Entry.BlogName), SearchFieldDataType.String),
                 new SearchField(nameof(Entry.Body), SearchFieldDataType.String) { IsFilterable = true, AnalyzerName = LexicalAnalyzerName.Values.StandardLucene },
+                new SimpleField(nameof(Entry.GroupId), SearchFieldDataType.Int32),
                 new SearchField(nameof(Entry.Id), SearchFieldDataType.String) { IsFilterable = true, IsKey = true },
                 new SearchField(nameof(Entry.IsPublished), SearchFieldDataType.Boolean) { IsFilterable = true },
+                new SimpleField(nameof(Entry.Name), SearchFieldDataType.String),
                 new SearchField(nameof(Entry.PublishDate), SearchFieldDataType.DateTimeOffset) { IsFilterable = true, IsSortable = true },
                 new SearchField(nameof(Entry.Tags), SearchFieldDataType.String) { IsFilterable = true, AnalyzerName = LexicalAnalyzerName.Values.StandardLucene },
                 new SearchField(nameof(Entry.Title), SearchFieldDataType.String) { IsFilterable = true, AnalyzerName = LexicalAnalyzerName.Values.StandardLucene }
