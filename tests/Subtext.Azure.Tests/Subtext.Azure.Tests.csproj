@@ -39,26 +39,17 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Azure.Core, Version=1.6.0.0, Culture=neutral, PublicKeyToken=92742159e12e44c8, processorArchitecture=MSIL">
-      <HintPath>..\..\src\packages\Azure.Core.1.6.0\lib\net461\Azure.Core.dll</HintPath>
+    <Reference Include="Azure.Core, Version=1.7.0.0, Culture=neutral, PublicKeyToken=92742159e12e44c8, processorArchitecture=MSIL">
+      <HintPath>..\..\src\packages\Azure.Core.1.7.0\lib\net461\Azure.Core.dll</HintPath>
     </Reference>
-    <Reference Include="Azure.Storage.Blobs, Version=12.7.0.0, Culture=neutral, PublicKeyToken=92742159e12e44c8, processorArchitecture=MSIL">
-      <HintPath>..\..\src\packages\Azure.Storage.Blobs.12.7.0\lib\netstandard2.0\Azure.Storage.Blobs.dll</HintPath>
-    </Reference>
-    <Reference Include="Azure.Storage.Common, Version=12.6.0.0, Culture=neutral, PublicKeyToken=92742159e12e44c8, processorArchitecture=MSIL">
-      <HintPath>..\..\src\packages\Azure.Storage.Common.12.6.0\lib\netstandard2.0\Azure.Storage.Common.dll</HintPath>
+    <Reference Include="Azure.Search.Documents, Version=11.1.1.0, Culture=neutral, PublicKeyToken=92742159e12e44c8, processorArchitecture=MSIL">
+      <HintPath>..\..\src\packages\Azure.Search.Documents.11.1.1\lib\netstandard2.0\Azure.Search.Documents.dll</HintPath>
     </Reference>
     <Reference Include="Castle.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
       <HintPath>..\..\src\packages\Castle.Core.4.4.1\lib\net45\Castle.Core.dll</HintPath>
     </Reference>
-    <Reference Include="ICSharpCode.SharpZipLib, Version=1.3.1.9, Culture=neutral, PublicKeyToken=1b03e6acf1164f73, processorArchitecture=MSIL">
-      <HintPath>..\..\src\packages\SharpZipLib.1.3.1\lib\net45\ICSharpCode.SharpZipLib.dll</HintPath>
-    </Reference>
     <Reference Include="log4net, Version=2.0.12.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
       <HintPath>..\..\src\packages\log4net.2.0.12\lib\net45\log4net.dll</HintPath>
-    </Reference>
-    <Reference Include="Lucene.Net, Version=3.0.3.0, Culture=neutral, PublicKeyToken=85089178b9ac3181, processorArchitecture=MSIL">
-      <HintPath>..\..\src\packages\Lucene.Net.3.0.3\lib\NET40\Lucene.Net.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=1.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\..\src\packages\Microsoft.Bcl.AsyncInterfaces.1.0.0\lib\net461\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
@@ -108,9 +99,9 @@
   <ItemGroup>
     <Compile Include="PrivateObject.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Storage\BlobIndexInputTests.cs" />
-    <Compile Include="Storage\BlobIndexOutputTests.cs" />
-    <Compile Include="Storage\BlobLockTests.cs" />
+    <Compile Include="Search\Services\AzureSearchClientTests.cs" />
+    <Compile Include="Search\Services\AzureSearchEngineServiceTests.cs" />
+    <Compile Include="Search\Services\AzureSearchIndexFactoryTests.cs" />
     <Compile Include="TestHelper.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -121,6 +112,10 @@
     <ProjectReference Include="..\..\src\Subtext.Azure\Subtext.Azure.csproj">
       <Project>{7f701d85-29a5-47a1-8d6c-d9aeac659bce}</Project>
       <Name>Subtext.Azure</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\Subtext.Framework\Subtext.Framework.csproj">
+      <Project>{afe766fe-5fc7-4b64-ae50-e54e9afd77f0}</Project>
+      <Name>Subtext.Framework</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />
