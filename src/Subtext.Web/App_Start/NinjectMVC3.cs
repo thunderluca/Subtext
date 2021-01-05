@@ -25,6 +25,7 @@ using System.Web.Routing;
 using Microsoft.Web.Infrastructure.DynamicModuleHelper;
 using Ninject;
 using Ninject.Web.Mvc;
+using Subtext.Azure.Search.Services;
 using Subtext.Configuration;
 using Subtext.Framework;
 using Subtext.Framework.Configuration;
@@ -143,8 +144,8 @@ namespace Subtext.Web.App_Start
             if (indexingServiceEnabled)
             {
                 kernel.Bind<IIndexingService>().To<IndexingService>().InSingletonScope();
-                kernel.Bind<Azure.Search.Services.IIndexFactory>().ToMethod(c => new Azure.Search.Services.AzureSearchIndexFactory(ConfigurationManager.AppSettings["searchApiKey"], ConfigurationManager.AppSettings["searchEndpoint"])).InSingletonScope();
-                kernel.Bind<ISearchEngineService>().To<Azure.Search.Services.AzureSearchEngineService>().InSingletonScope();
+                kernel.Bind<IIndexFactory>().ToMethod(c => new AzureSearchIndexFactory(ConfigurationManager.AppSettings["searchApiKey"], ConfigurationManager.AppSettings["searchEndpoint"])).InSingletonScope();
+                kernel.Bind<ISearchEngineService>().To<AzureSearchEngineService>().InSingletonScope().WithConstructorArgument("logger", log4net.LogManager.GetLogger(nameof(AzureSearchEngineService)));
             }
             else
             {
