@@ -18,7 +18,7 @@ namespace Subtext.Azure.Search.Models
         public int GroupId { get; set; }
 
         [SearchableField(IsFilterable = true, IsKey = true)]
-        public int Id { get; set; }
+        public string Id { get; set; }
 
         [SearchableField(IsFilterable = true)]
         public bool IsPublished { get; set; }

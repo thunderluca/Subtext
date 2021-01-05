@@ -51,7 +51,7 @@ namespace Subtext.Azure.Search
                         Body = post.Body,
                         GroupId = post.GroupId,
                         IsPublished = post.IsPublished,
-                        Id = post.EntryId,
+                        Id = post.EntryId.ToString(),
                         Name = post.EntryName,
                         PublishDate = post.PublishDate,
                         Tags = post.Tags,
@@ -169,7 +169,7 @@ namespace Subtext.Azure.Search
 
                 options = new SearchOptions
                 {
-                    Filter = $"{nameof(Entry.Id)} eq {postId}"
+                    Filter = $"{nameof(Entry.Id)} eq '{postId}'"
                 };
 
                 response = client.Search<Entry>("*", options);
@@ -210,7 +210,7 @@ namespace Subtext.Azure.Search
             {
                 response = client.Search<Entry>(queryString, new SearchOptions
                 {
-                    Filter = $"{nameof(Entry.Id)} eq {entryId}"
+                    Filter = $"{nameof(Entry.Id)} eq '{entryId}'"
                 });
             }
             else
@@ -235,7 +235,7 @@ namespace Subtext.Azure.Search
                 .Select(sr => new SearchEngineResult
                 {
                     BlogName = sr.Document.BlogName,
-                    EntryId = sr.Document.Id,
+                    EntryId = int.Parse(sr.Document.Id),
                     EntryName = sr.Document.Name,
                     PublishDate = sr.Document.PublishDate,
                     Score = sr.Score.HasValue ? Convert.ToSingle(sr.Score.Value) : 0f,
@@ -261,7 +261,7 @@ namespace Subtext.Azure.Search
                 new SearchField(nameof(Entry.BlogName), SearchFieldDataType.String) { IsFilterable = true },
                 new SearchField(nameof(Entry.Body), SearchFieldDataType.String) { IsFilterable = true },
                 new SearchField(nameof(Entry.GroupId), SearchFieldDataType.Int32) { IsFilterable = true },
-                new SearchField(nameof(Entry.Id), SearchFieldDataType.Int32) { IsFilterable = true, IsKey = true },
+                new SearchField(nameof(Entry.Id), SearchFieldDataType.String) { IsFilterable = true, IsKey = true },
                 new SearchField(nameof(Entry.IsPublished), SearchFieldDataType.Boolean) { IsFilterable = true },
                 new SearchField(nameof(Entry.Name), SearchFieldDataType.String) { IsFilterable = true },
                 new SearchField(nameof(Entry.PublishDate), SearchFieldDataType.DateTimeOffset) { IsFilterable = true, IsSortable = true },
