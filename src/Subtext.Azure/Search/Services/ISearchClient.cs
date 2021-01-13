@@ -7,7 +7,7 @@ namespace Subtext.Azure.Search.Services
     {
         bool ContainsEntry(int entryId);
 
-        long CountEntries();
+        long CountEntries(int blogId = -1);
 
         void DeleteEntries(string fieldName, string[] values, bool throwOnError);
 

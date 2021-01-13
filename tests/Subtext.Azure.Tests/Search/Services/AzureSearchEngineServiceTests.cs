@@ -25,12 +25,12 @@ namespace Subtext.Azure.Tests.Search.Services
             _searchClientMock = new Mock<ISearchClient>();
 
             _searchClientMock.Setup(sc => sc.ContainsEntry(15)).Returns(true);
-            _searchClientMock.Setup(sc => sc.CountEntries()).Returns(20);
+            _searchClientMock.Setup(sc => sc.CountEntries(-1)).Returns(20);
+            _searchClientMock.Setup(sc => sc.CountEntries(1)).Returns(20);
             _searchClientMock.Setup(sc => sc.UploadEntry(It.Is<SearchEngineEntry>(q => q.EntryId == 15))).Returns(new IndexingError[0]);
 
             _indexFactoryMock.Setup(i => i.GetIndexNames()).Returns(new[] { "blog-1" });
-            _indexFactoryMock.Setup(i => i.GetSearchClient(1)).Returns(_searchClientMock.Object);
-            _indexFactoryMock.Setup(i => i.GetSearchClient("blog-1")).Returns(_searchClientMock.Object);
+            _indexFactoryMock.Setup(i => i.GetSearchClient()).Returns(_searchClientMock.Object);
         }
 
         [TestMethod]
@@ -235,7 +235,7 @@ namespace Subtext.Azure.Tests.Search.Services
             var warningMessage = warningMessageObject as string;
             Assert.AreEqual("The indexing service didn't find any index", warningMessage);
 
-            _indexFactoryMock.Verify(i => i.GetSearchClient(It.IsAny<string>()), Times.Never());
+            _indexFactoryMock.Verify(i => i.GetSearchClient(), Times.Never());
         }
 
         [TestMethod]
@@ -257,7 +257,7 @@ namespace Subtext.Azure.Tests.Search.Services
             var warningMessage = warningMessageObject as string;
             Assert.AreEqual("The indexing service didn't find any index", warningMessage);
 
-            _indexFactoryMock.Verify(i => i.GetSearchClient(It.IsAny<string>()), Times.Never());
+            _indexFactoryMock.Verify(i => i.GetSearchClient(), Times.Never());
         }
 
         [TestMethod]

@@ -23,15 +23,35 @@ namespace Subtext.Azure.Search.Services
         {
             var response = _client.Search<Entry>("*", new SearchOptions
             {
-                Filter = $"{nameof(Entry.Id)} eq '{entryId}'"
+                Filter = $"{nameof(Entry.Id)} eq '{entryId}'",
+                IncludeTotalCount = true
             });
 
             return response != null && response.Value != null && response.Value.TotalCount > 0;
         }
 
-        public long CountEntries()
+        public long CountEntries(int blogId = -1)
         {
-            return _client.GetDocumentCount();
+            if (blogId <= -1)
+            {
+                return _client.GetDocumentCount();
+            }
+
+            var options = new SearchOptions
+            {
+                Filter = $"{nameof(Entry.BlogId)} eq {blogId}",
+                IncludeTotalCount = true
+            };
+
+            var response = _client.Search<Entry>("*", options);
+
+            if (response == null || response.Value == null)
+            {
+                _logger?.Warn($"Received null response from index document count with blog id '{blogId}'");
+                return 0;
+            }
+
+            return response.Value.TotalCount.GetValueOrDefault();
         }
 
         public void DeleteEntries(string fieldName, string[] values, bool throwOnError)
@@ -44,6 +64,7 @@ namespace Subtext.Azure.Search.Services
             var response = _client.Search<Entry>(query, new SearchOptions
             {
                 Filter = entryId > -1 ? $"{nameof(Entry.Id)} eq '{entryId}'" : null,
+                IncludeTotalCount = true,
                 Size = size
             });
 

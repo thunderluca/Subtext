@@ -7,6 +7,9 @@ namespace Subtext.Azure.Search.Models.Preview
         [JsonPropertyName("searchFields")]
         public string Fields { get; set; }
 
+        [JsonPropertyName("filter")]
+        public string Filter { get; set; }
+
         [JsonPropertyName("moreLikeThis")]
         public string MoreLikeThis { get; set; }
     }

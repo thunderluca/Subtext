@@ -4,14 +4,12 @@ namespace Subtext.Azure.Search.Services
 {
     public interface IIndexFactory
     {
-        void EnsureIndexExists(int blogId);
+        void EnsureIndexExists();
 
         IEnumerable<string> GetIndexNames();
 
-        ISearchClient GetPreviewSearchClient(int blogId);
+        ISearchClient GetPreviewSearchClient();
 
-        ISearchClient GetSearchClient(int blogId);
-
-        ISearchClient GetSearchClient(string indexName);
+        ISearchClient GetSearchClient();
     }
 }

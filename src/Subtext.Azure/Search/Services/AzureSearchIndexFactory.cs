@@ -10,11 +10,13 @@ namespace Subtext.Azure.Search.Services
 {
     public class AzureSearchIndexFactory : IIndexFactory
     {
-        private readonly IDictionary<string, ISearchClient> _cacheClients;
+        private readonly IDictionary<bool, ISearchClient> _cacheClients;
         private readonly string _endpoint;
         private readonly IHttpService _httpService;
         private readonly SearchIndexClient _indexClient;
         private readonly ISerializationService _serializationService;
+
+        const string INDEX_NAME = "subtext-index";
 
         public AzureSearchIndexFactory(string apiKey, string endpoint, IHttpService httpService, ISerializationService serializationService)
         {
@@ -28,16 +30,16 @@ namespace Subtext.Azure.Search.Services
                 throw new ArgumentException($"{nameof(endpoint)} cannot be null, empty or blank", nameof(endpoint));
             }
 
-            _cacheClients = new Dictionary<string, ISearchClient>();
+            _cacheClients = new Dictionary<bool, ISearchClient>();
             _endpoint = endpoint;
             _httpService = httpService ?? throw new ArgumentNullException(nameof(httpService));
             _indexClient = new SearchIndexClient(new Uri(endpoint), new AzureKeyCredential(apiKey));
             _serializationService = serializationService ?? throw new ArgumentNullException(nameof(serializationService));
         }
 
-        public void EnsureIndexExists(int blogId)
+        public void EnsureIndexExists()
         {
-            var searchIndex = GetSearchIndex(blogId);
+            var searchIndex = GetSearchIndex();
 
             _indexClient.CreateOrUpdateIndex(searchIndex);
         }
@@ -53,35 +55,37 @@ namespace Subtext.Azure.Search.Services
             return indexes.Select(i => i.Name).ToArray();
         }
 
-        public ISearchClient GetPreviewSearchClient(int blogId)
+        public ISearchClient GetPreviewSearchClient()
         {
-            var client = new Preview.AzurePreviewSearchClient(_endpoint, blogId, _httpService, _serializationService);
+            if (_cacheClients.ContainsKey(true))
+            {
+                return _cacheClients[true];
+            }
+
+            var client = new Preview.AzurePreviewSearchClient(_endpoint, INDEX_NAME, _httpService, _serializationService);
+
+            _cacheClients[true] = client;
 
             return client;
         }
 
-        public ISearchClient GetSearchClient(int blogId)
+        public ISearchClient GetSearchClient()
         {
-            return GetSearchClient($"blog-{blogId}");
-        }
-
-        public ISearchClient GetSearchClient(string indexName)
-        {
-            if (_cacheClients.ContainsKey(indexName))
+            if (_cacheClients.ContainsKey(false))
             {
-                return _cacheClients[indexName];
+                return _cacheClients[false];
             }
 
-            var searchClient = _indexClient.GetSearchClient(indexName);
+            var searchClient = _indexClient.GetSearchClient(INDEX_NAME);
 
             var client = new AzureSearchClient(searchClient);
 
-            _cacheClients[indexName] = client;
+            _cacheClients[false] = client;
 
             return client;
         }
 
-        private SearchIndex GetSearchIndex(int blogId)
+        private SearchIndex GetSearchIndex()
         {
             var searchFields = new[]
             {
@@ -97,7 +101,7 @@ namespace Subtext.Azure.Search.Services
                 new SearchField(nameof(Entry.Title), SearchFieldDataType.String) { IsFilterable = true, AnalyzerName = LexicalAnalyzerName.Values.StandardLucene }
             };
 
-            var searchIndex = new SearchIndex($"blog-{blogId}", searchFields);
+            var searchIndex = new SearchIndex(INDEX_NAME, searchFields);
 
             return searchIndex;
         }

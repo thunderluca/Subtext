@@ -25,13 +25,13 @@ namespace Subtext.Azure.Search.Services
                 throw new ArgumentNullException(nameof(post));
             }
 
-            _indexFactory.EnsureIndexExists(post.BlogId);
+            _indexFactory.EnsureIndexExists();
 
             this.RemovePost(post.EntryId);
 
             try
             {
-                var client = _indexFactory.GetSearchClient(post.BlogId);
+                var client = _indexFactory.GetSearchClient();
 
                 var errors = client.UploadEntry(post);
 
@@ -81,11 +81,11 @@ namespace Subtext.Azure.Search.Services
 
         public int GetIndexedEntryCount(int blogId)
         {
-            _indexFactory.EnsureIndexExists(blogId);
+            _indexFactory.EnsureIndexExists();
 
-            var client = _indexFactory.GetSearchClient(blogId);
+            var client = _indexFactory.GetSearchClient();
 
-            var documentCount = client.CountEntries();
+            var documentCount = client.CountEntries(blogId);
 
             return (int)documentCount;
         }
@@ -101,24 +101,16 @@ namespace Subtext.Azure.Search.Services
                 return totalCount;
             }
 
-            ISearchClient client;
-            long indexDocumentCount;
+            var client = _indexFactory.GetSearchClient();
 
-            foreach (var indexName in indexNames)
-            {
-                client = _indexFactory.GetSearchClient(indexName);
-
-                indexDocumentCount = client.CountEntries();
-
-                totalCount += (int)indexDocumentCount;
-            }
+            totalCount = (int)client.CountEntries();
 
             return totalCount;
         }
 
         public IEnumerable<SearchEngineResult> RelatedContents(int entryId, int max, int blogId)
         {
-            var client = _indexFactory.GetPreviewSearchClient(blogId);
+            var client = _indexFactory.GetPreviewSearchClient();
 
             var results = client.SearchRelatedContents(blogId, max, entryId);
 
@@ -134,28 +126,14 @@ namespace Subtext.Azure.Search.Services
                 return;
             }
 
-            ISearchClient client;
-            string indexNameToUpdate = null;
+            var client = _indexFactory.GetSearchClient();
 
-            foreach (var indexName in indexNames)
-            {
-                client = _indexFactory.GetSearchClient(indexName);
-
-                var result = client.ContainsEntry(postId);
-                if (result)
-                {
-                    indexNameToUpdate = indexName;
-                    break;
-                }
-            }
-
-            if (indexNameToUpdate == null)
+            var result = client.ContainsEntry(postId);
+            if (!result)
             {
                 _logger?.Warn($"Didn't find any index that contains post with id '{postId}'");
                 return;
             }
-
-            client = _indexFactory.GetSearchClient(indexNameToUpdate);
 
             client.DeleteEntries(nameof(Entry.Id), new[] { postId.ToString() }, true);
         }
@@ -167,9 +145,9 @@ namespace Subtext.Azure.Search.Services
 
         public IEnumerable<SearchEngineResult> Search(string queryString, int max, int blogId, int entryId)
         {
-            _indexFactory.EnsureIndexExists(blogId);
+            _indexFactory.EnsureIndexExists();
 
-            var client = _indexFactory.GetSearchClient(blogId);
+            var client = _indexFactory.GetSearchClient();
 
             var results = client.Search(queryString, blogId, max, entryId);
 
